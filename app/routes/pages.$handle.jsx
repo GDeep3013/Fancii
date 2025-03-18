@@ -44,16 +44,22 @@ console.log('context.storefront',context.storefront)
   if (!page) {
     throw new Response('Not Found', {status: 404});
   }
-  const [{tylorproduct}] = await Promise.all([
-    context.storefront.query(PAGE_QUERY, {
-      variables: {
-        id: "gid://shopify/Product/10099694108983",
-      },
-    }),
-  ]);
-console.log(tylorproduct,"tylorproduct");
+
+  const {data, errors} = await context.storefront.query(GetProduct, {
+    variables: {
+      id: "gid://shopify/Product/10099694108983",
+    },
+  });
+  
+  if (errors) {
+    console.error("GraphQL Error test sandeep:", errors);
+  }
+  if (!data?.product) {
+    throw new Error("Product not found");
+  }
+  console.log("Product Data:", data.product);
   return {
-    page,tylorproduct,
+    page,data,
   };
 }
 
@@ -100,7 +106,8 @@ const PAGE_QUERY = `#graphql
   }
 `;
 
-const GetProduct = `#graphql query GetProduct($id: ID!) {
+const GetProduct = `#graphql 
+query GetProduct($id: ID!) {
   product(id: $id) {
     id
     title
