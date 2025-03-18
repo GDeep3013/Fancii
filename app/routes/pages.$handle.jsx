@@ -29,7 +29,7 @@ async function loadCriticalData({context, params}) {
   if (!params.handle) {
     throw new Error('Missing page handle');
   }
-
+console.log('context.storefront',context.storefront)
   const [{page}] = await Promise.all([
     context.storefront.query(PAGE_QUERY, {
       variables: {
@@ -44,10 +44,13 @@ async function loadCriticalData({context, params}) {
   if (!page) {
     throw new Response('Not Found', {status: 404});
   }
-
   const [{tylorproduct}] = await Promise.all([
-    context.storefront.query(GetProduct),
-]);
+    context.storefront.query(PAGE_QUERY, {
+      variables: {
+        id: "gid://shopify/Product/10099694108983",
+      },
+    }),
+  ]);
 console.log(tylorproduct,"tylorproduct");
   return {
     page,tylorproduct,
@@ -96,8 +99,9 @@ const PAGE_QUERY = `#graphql
     }
   }
 `;
-const  GetProduct = `
-  query product(id: "gid://shopify/Product/10099694108983") {
+
+const GetProduct = `#graphql query GetProduct($id: ID!) {
+  product(id: $id) {
     id
     title
     variants(first: 100) {
@@ -106,7 +110,7 @@ const  GetProduct = `
         title
         sku
         price{
-            amount
+          amount
         }
         quantityAvailable
         image{
@@ -122,7 +126,9 @@ const  GetProduct = `
         title
       }
     }
-  }`;
+  }
+}`;
+
 
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
