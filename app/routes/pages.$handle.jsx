@@ -11,15 +11,89 @@ export const meta = ({data}) => {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
+  const productId = "gid://shopify/Product/10099694108983"; // Assuming productId is passed in the URL
+  const shopifyEndpoint = "https://htbu48-ps.myshopify.com/api/2024-10/graphql.json";
+  const shopifyToken = "5620c3de24f081b6dc8328658eb56304";
+
+  const query = `
+    query GetProductById($id: ID!) {
+      product(id: $id) {
+        id
+        title
+        descriptionHtml
+        images(first: 10) {
+          nodes {
+            url
+            altText
+          }
+        }
+        variants(first: 10) {
+          nodes {
+            id
+            title
+            price {
+              amount
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const variables = { id: `gid://shopify/Product/${productId}` };
+
+  try {
+    const response = await fetch(shopifyEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Storefront-Access-Token': shopifyToken,
+      },
+      body: JSON.stringify({ query, variables }),
+    });
+
+    const { data, errors } = await response.json();
+    if (errors) {
+      console.error("GraphQL Errors:", errors);
+      throw new Error("Product not found");
+    }
+
+    return json(data.product);
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    throw new Error("Product not found");
+  }
+
   // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
 
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
+
   return {...deferredData, ...criticalData};
 }
+export default function ProductPage() {
+  const product = useLoaderData();
 
+  return (
+    <div>
+      <h1>{product.title}</h1>
+      <div dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />
+      {product.images?.nodes.map((image, index) => (
+        <img key={index} src={image.url} alt={image.altText || product.title} />
+      ))}
+      <h3>Variants:</h3>
+      <ul>
+        {product.variants.nodes.map((variant) => (
+          <li key={variant.id}>
+            {variant.title} - ${variant.price.amount}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 /**
  * Load data necessary for rendering content above the fold. This is the critical data
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
@@ -75,14 +149,23 @@ function loadDeferredData({context}) {
 
 export default function Page() {
   /** @type {LoaderReturnData} */
-  const {page} = useLoaderData();
+  const product = useLoaderData();
 
   return (
-    <div className="page">
-      <header>
-        <h1>{page.title}</h1>
-      </header>
-      <main dangerouslySetInnerHTML={{__html: page.body}} />
+    <div>
+      <h1>{product.title}</h1>
+      <div dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />
+      {product.images?.nodes.map((image, index) => (
+        <img key={index} src={image.url} alt={image.altText || product.title} />
+      ))}
+      <h3>Variants:</h3>
+      <ul>
+        {product.variants.nodes.map((variant) => (
+          <li key={variant.id}>
+            {variant.title} - ${variant.price.amount}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -111,7 +194,7 @@ query GetProduct($id: ID!) {
   product(id: $id) {
     id
     title
-    variants(first: 100) {
+    variants(first:10) {
       nodes {
         id
         title
