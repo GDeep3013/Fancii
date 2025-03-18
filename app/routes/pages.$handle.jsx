@@ -37,14 +37,20 @@ async function loadCriticalData({context, params}) {
       },
     }),
     // Add other queries here, so that they are loaded in parallel
+  
+
   ]);
 
   if (!page) {
     throw new Response('Not Found', {status: 404});
   }
 
+  const [{tylorproduct}] = await Promise.all([
+    context.storefront.query(GetProduct),
+]);
+console.log(tylorproduct,"tylorproduct");
   return {
-    page,
+    page,tylorproduct,
   };
 }
 
@@ -90,6 +96,34 @@ const PAGE_QUERY = `#graphql
     }
   }
 `;
+const  GetProduct = `
+  query product(id: "gid://shopify/Product/6733909426260") {
+    id
+    title
+    variants(first: 100) {
+      nodes {
+        id
+        title
+        sku
+        price{
+            amount
+        }
+        quantityAvailable
+        image{
+            url
+            originalSrc
+        }
+      }
+    }
+    
+    collections(first: 10) {
+      nodes {
+        id
+        title
+      }
+    }
+  }`;
+
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
