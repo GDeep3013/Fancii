@@ -73,27 +73,7 @@ export async function loader(args) {
 
   return {...deferredData, ...criticalData};
 }
-export default function ProductPage() {
-  const product = useLoaderData();
 
-  return (
-    <div>
-      <h1>{product.title}</h1>
-      <div dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />
-      {product.images?.nodes.map((image, index) => (
-        <img key={index} src={image.url} alt={image.altText || product.title} />
-      ))}
-      <h3>Variants:</h3>
-      <ul>
-        {product.variants.nodes.map((variant) => (
-          <li key={variant.id}>
-            {variant.title} - ${variant.price.amount}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 /**
  * Load data necessary for rendering content above the fold. This is the critical data
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
@@ -149,6 +129,7 @@ function loadDeferredData({context}) {
 
 export default function Page() {
   /** @type {LoaderReturnData} */
+
   const product = useLoaderData();
 
   return (
@@ -168,6 +149,17 @@ export default function Page() {
       </ul>
     </div>
   );
+  
+  // const {page} = useLoaderData();
+
+  // return (
+  //   <div className="page">
+  //     <header>
+  //       <h1>{page.title}</h1>
+  //     </header>
+  //     <main dangerouslySetInnerHTML={{__html: page.body}} />
+  //   </div>
+  // );
 }
 
 const PAGE_QUERY = `#graphql
