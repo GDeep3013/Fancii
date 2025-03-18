@@ -97,7 +97,7 @@ const PAGE_QUERY = `#graphql
   }
 `;
 const  GetProduct = `
-  query product(id: "gid://shopify/Product/6733909426260") {
+  query product(id: "gid://shopify/Product/10099694108983") {
     id
     title
     variants(first: 100) {
