@@ -65,13 +65,13 @@ export async function loader(args) {
   }
 
   // Start fetching non-critical data without blocking time to first byte
-  const deferredData = loadDeferredData(args);
+  // const deferredData = loadDeferredData(args);
 
-  // Await the critical data required to render initial state of the page
-  const criticalData = await loadCriticalData(args);
+  // // Await the critical data required to render initial state of the page
+  // const criticalData = await loadCriticalData(args);
 
 
-  return {...deferredData, ...criticalData};
+  // return {...deferredData, ...criticalData};
 }
 
 /**
@@ -83,7 +83,6 @@ async function loadCriticalData({context, params}) {
   if (!params.handle) {
     throw new Error('Missing page handle');
   }
-console.log('context.storefront',context.storefront)
   const [{page}] = await Promise.all([
     context.storefront.query(PAGE_QUERY, {
       variables: {
@@ -99,21 +98,8 @@ console.log('context.storefront',context.storefront)
     throw new Response('Not Found', {status: 404});
   }
 
-  const {data, errors} = await context.storefront.query(GetProduct, {
-    variables: {
-      id: "gid://shopify/Product/10099694108983",
-    },
-  });
-  
-  if (errors) {
-    console.error("GraphQL Error test sandeep:", errors);
-  }
-  if (!data?.product) {
-    throw new Error("Product not found");
-  }
-  console.log("Product Data:", data.product);
   return {
-    page,data,
+    page,
   };
 }
 
@@ -149,7 +135,7 @@ export default function Page() {
       </ul>
     </div>
   );
-  
+
   // const {page} = useLoaderData();
 
   // return (
