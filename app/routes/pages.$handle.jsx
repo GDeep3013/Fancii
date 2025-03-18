@@ -11,7 +11,7 @@ export const meta = ({data}) => {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
-  const productId = "gid://shopify/Product/10099694108983"; // Assuming productId is passed in the URL
+  const productId = "10099694108983"; // Assuming productId is passed in the URL
   const shopifyEndpoint = "https://htbu48-ps.myshopify.com/api/2024-10/graphql.json";
   const shopifyToken = "5620c3de24f081b6dc8328658eb56304";
 
