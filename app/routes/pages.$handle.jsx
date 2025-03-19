@@ -54,7 +54,7 @@ async function addToCartAndCheckout(productId, variantId) {
     if (currentParams) {
       checkoutUrl += (checkoutUrl.includes('?') ? '&' : '?') + currentParams.substring(1);
     }
-
+console.log(checkoutUrl);
     // Redirect to checkout
     window.location.href = checkoutUrl;
   } catch (error) {
