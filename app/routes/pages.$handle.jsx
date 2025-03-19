@@ -1,39 +1,67 @@
-mport { useLoaderData } from '@remix-run/react';
-import { CartProvider, useCart } from '@shopify/hydrogen-react';
-import { useEffect } from 'react';
+import { useLoaderData } from '@remix-run/react';
 
+/**
+ * @type {MetaFunction<typeof loader>}
+ */
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.page?.title ?? 'Untitled'}` }];
 };
 
-const variantid = 'gid://shopify/ProductVariant/40117447884884';
 
-function AddToCartAndCheckout({ variantid, quantity = 1 }) {
-  const { cartCreate } = useCart();
 
-  const handleAddToCart = async () => {
-    const response = await cartCreate({
-      lines: [
-        {
-          merchandiseId: variantid,
-          quantity,
-        },
-      ],
+async function addToCartAndCheckout(productId, variantId) {
+  const shopifyEndpoint = 'https://htbu48-ps.myshopify.com/api/2024-10/graphql.json';
+  const shopifyToken = '5620c3de24f081b6dc8328658eb56304';
+
+  const mutation = `
+    mutation CreateCart($variantId: ID!) {
+      cartCreate(input: {
+        lines: [
+          {
+            merchandiseId: $variantId,
+            quantity: 1
+          }
+        ]
+      }) {
+        cart {
+          id
+          checkoutUrl
+        }
+      }
+    }
+  `;
+
+  try {
+    const response = await fetch(shopifyEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Storefront-Access-Token': shopifyToken,
+      },
+      body: JSON.stringify({ query: mutation, variables: { variantId } }),
     });
 
-    if (response?.checkoutUrl) {
-      window.location.href = response.checkoutUrl;
-    } else {
-      console.error('Error adding to cart or getting checkout URL');
+    const { data, errors } = await response.json();
+    if (errors || !data?.cartCreate?.cart?.checkoutUrl) {
+      console.error('Error creating cart:', errors);
+      alert('Failed to add to cart. Please try again.');
+      return;
     }
-  };
 
-  return (
-    <button onClick={handleAddToCart} className="bg-blue-500 text-white px-4 py-2 rounded">
-      Buy Now
-    </button>
-  );
+    // Redirect to checkout
+    window.location.href = data.cartCreate.cart.checkoutUrl;
+  } catch (error) {
+    console.error('Cart API Error:', error);
+    alert('Error adding item to cart.');
+  }
 }
+
+
+
+/**
+ * @param {LoaderFunctionArgs} args
+ */
+
 
 export async function loader(args) {
   const productId = '10099694108983';
@@ -90,7 +118,7 @@ export async function loader(args) {
   }
 }
 
-function Page() {
+export default function Page() {
   const product = useLoaderData();
 
   if (!product) {
@@ -98,25 +126,78 @@ function Page() {
   }
 
   return (
-    <CartProvider>
-      <div>
-        <h1>{product.title}</h1>
-        <div dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />
-        {product.images?.nodes?.map((image, index) => (
-          <img key={index} src={image.url} alt={image.altText || product.title} />
-        ))}
-        <h3>Variants:</h3>
-        <ul>
-          {product.variants?.nodes?.map((variant) => (
-            <li key={variant.id}>
-              {variant.title} - ${variant.price?.amount || 'N/A'}
-            </li>
-          ))}
-        </ul>
-        <AddToCartAndCheckout variantid={variantid} />
-      </div>
-    </CartProvider>
+    <div>
+    <h1>{product.title}</h1>
+    <div dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />
+    {product.images?.nodes?.map((image, index) => (
+      <img key={index} src={image.url} alt={image.altText || product.title} />
+    ))}
+    <h3>Variants:</h3>
+    <ul>
+      {product.variants?.nodes?.map((variant) => (
+        <li key={variant.id}>
+          {variant.title} - ${variant.price?.amount || 'N/A'}
+          <button
+            onClick={() => addToCartAndCheckout(product.id, variant.id)}
+            style={{ marginLeft: '10px' }}
+          >
+            Buy Now
+          </button>
+        </li>
+      ))}
+    </ul>
+  </div>
   );
 }
 
-export default Page;
+const PAGE_QUERY = `#graphql
+  query Page(
+    $language: LanguageCode,
+    $country: CountryCode,
+    $handle: String!
+  )
+  @inContext(language: $language, country: $country) {
+    page(handle: $handle) {
+      id
+      title
+      body
+      seo {
+        description
+        title
+      }
+    }
+  }
+`;
+
+const GetProduct = `#graphql 
+query GetProduct($id: ID!) {
+  product(id: $id) {
+    id
+    title
+    variants(first: 10) {
+      nodes {
+        id
+        title
+        sku
+        price {
+          amount
+        }
+        quantityAvailable
+        image {
+          url
+          originalSrc
+        }
+      }
+    }
+    collections(first: 10) {
+      nodes {
+        id
+        title
+      }
+    }
+  }
+}`;
+
+/** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
+/** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
+/** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */
