@@ -47,9 +47,16 @@ async function addToCartAndCheckout(productId, variantId) {
       alert('Failed to add to cart. Please try again.');
       return;
     }
+    const currentParams = window.location.search;
+
+    // Append parameters to checkout URL
+    let checkoutUrl = data.cartCreate.cart.checkoutUrl;
+    if (currentParams) {
+      checkoutUrl += (checkoutUrl.includes('?') ? '&' : '?') + currentParams.substring(1);
+    }
 
     // Redirect to checkout
-    window.location.href = data.cartCreate.cart.checkoutUrl;
+    window.location.href = checkoutUrl;
   } catch (error) {
     console.error('Cart API Error:', error);
     alert('Error adding item to cart.');
