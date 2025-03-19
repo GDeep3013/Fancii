@@ -131,11 +131,12 @@ export default function Page() {
     <div dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />   
     <h3>Variants:</h3>
     <ul>
+    <li>
       {product.images?.nodes?.map((image, index) => (
-      <li><img key={index} src={image.url} alt={image.altText || product.title} width="200" /></li>
+      <img key={index} src={image.url} alt={image.altText || product.title} width="200" />
     ))}
       {product.variants?.nodes?.map((variant) => (
-        <li key={variant.id}>
+        <span key={variant.id}>
           {variant.title} - ${variant.price?.amount || 'N/A'}
           <button
             onClick={() => addToCartAndCheckout(product.id, variant.id)}
@@ -143,8 +144,9 @@ export default function Page() {
           >
             Buy Now
           </button>
-        </li>
+        </span>
       ))}
+      </li>
     </ul>
   </div>
   );
