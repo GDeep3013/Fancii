@@ -1,68 +1,46 @@
-import React from 'react';
 import { useLoaderData } from '@remix-run/react';
-import { useShop } from '@shopify/hydrogen';
+import { useCart } from '@shopify/hydrogen-react';
+import { useEffect } from 'react';
 
-const CREATE_CART_MUTATION = `
-  mutation CreateCart($input: CartInput!) {
-    cartCreate(input: $input) {
-      cart {
-        id
-        checkoutUrl
-      }
-      userErrors {
-        field
-        message
-      }
-    }
-  }
-`;
+/**
+ * @type {MetaFunction<typeof loader>}
+ */
+export const meta = ({ data }) => {
+  return [{ title: `Hydrogen | ${data?.page?.title ?? 'Untitled'}` }];
+};
 
+const variantid = 'gid://shopify/ProductVariant/40117447884884';
 export function AddToCartAndCheckout({ variantid, quantity = 1 }) {
-  const { storeDomain, storefrontToken } = useShop();
+  const { cartCreate } = useCart();
 
   const handleAddToCart = async () => {
-    try {
-      const response = await fetch(`https://${storeDomain}/api/2024-10/graphql.json`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Storefront-Access-Token': storefrontToken,
+    const response = await cartCreate({
+      lines: [
+        {
+          merchandiseId: variantid,
+          quantity,
         },
-        body: JSON.stringify({
-          query: CREATE_CART_MUTATION,
-          variables: {
-            input: {
-              lines: [
-                {
-                  merchandiseId: variantid,
-                  quantity,
-                },
-              ],
-            },
-          },
-        }),
-      });
+      ],
+    });
 
-      const result = await response.json();
-
-      if (result?.data?.cartCreate?.cart?.checkoutUrl) {
-        window.location.href = result.data.cartCreate.cart.checkoutUrl; // Redirect to checkout
-      } else {
-        console.error('Error:', result?.data?.cartCreate?.userErrors);
-      }
-    } catch (error) {
-      console.error('Error creating cart:', error);
+    if (response?.cart?.checkoutUrl) {
+      window.location.href = response.cart.checkoutUrl; // Redirect to checkout
+    } else {
+      console.error('Error adding to cart or getting checkout URL');
     }
   };
 
   return (
-    <button onClick={handleAddToCart} className="bg-blue-500 text-white px-4 py-2 rounded">
+    <button
+      onClick={handleAddToCart}
+      className="bg-blue-500 text-white px-4 py-2 rounded"
+    >
       Buy Now
     </button>
   );
 }
 
-export async function loader() {
+export async function loader(args) {
   const productId = '10099694108983';
   const shopifyEndpoint = 'https://htbu48-ps.myshopify.com/api/2024-10/graphql.json';
   const shopifyToken = '5620c3de24f081b6dc8328658eb56304';
@@ -136,10 +114,62 @@ export default function Page() {
         {product.variants?.nodes?.map((variant) => (
           <li key={variant.id}>
             {variant.title} - ${variant.price?.amount || 'N/A'}
-            <AddToCartAndCheckout variantid={variant.id} />
           </li>
         ))}
       </ul>
+      <AddToCartAndCheckout variantid={variantid} />
     </div>
   );
 }
+
+const PAGE_QUERY = `#graphql
+  query Page(
+    $language: LanguageCode,
+    $country: CountryCode,
+    $handle: String!
+  )
+  @inContext(language: $language, country: $country) {
+    page(handle: $handle) {
+      id
+      title
+      body
+      seo {
+        description
+        title
+      }
+    }
+  }
+`;
+
+const GetProduct = `#graphql 
+query GetProduct($id: ID!) {
+  product(id: $id) {
+    id
+    title
+    variants(first: 10) {
+      nodes {
+        id
+        title
+        sku
+        price {
+          amount
+        }
+        quantityAvailable
+        image {
+          url
+          originalSrc
+        }
+      }
+    }
+    collections(first: 10) {
+      nodes {
+        id
+        title
+      }
+    }
+  }
+}`;
+
+/** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
+/** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
+/** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */
