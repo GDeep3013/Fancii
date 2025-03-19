@@ -14,7 +14,7 @@ export const meta = ({ data }) => {
  */
 
 const variantid = 'gid://shopify/ProductVariant/40117447884884';
-export default function AddToCartAndCheckout({variantid, quantity = 1}) {
+export  function AddToCartAndCheckout({variantid, quantity = 1}) {
   const {cartCreate, checkoutUrl} = useCart();
   const {storeDomain} = useShop();
 
