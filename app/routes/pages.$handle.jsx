@@ -1,4 +1,6 @@
 import { useLoaderData } from '@remix-run/react';
+import {useShop, useCart} from '@shopify/hydrogen';
+import {useEffect} from 'react';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -10,6 +12,40 @@ export const meta = ({ data }) => {
 /**
  * @param {LoaderFunctionArgs} args
  */
+
+const variantid = 'gid://shopify/ProductVariant/40117447884884';
+export default function AddToCartAndCheckout({variantid, quantity = 1}) {
+  const {cartCreate, checkoutUrl} = useCart();
+  const {storeDomain} = useShop();
+
+  const handleAddToCart = async () => {
+    const response = await cartCreate({
+      lines: [
+        {
+          merchandiseId: variantid,
+          quantity,
+        },
+      ],
+    });
+
+    if (response?.checkoutUrl) {
+      window.location.href = response.checkoutUrl; // Redirect to checkout
+    } else {
+      console.error('Error adding to cart or getting checkout URL');
+    }
+  };
+
+  return (
+    <button
+      onClick={handleAddToCart}
+      className="bg-blue-500 text-white px-4 py-2 rounded"
+    >
+      Buy Now
+    </button>
+  );
+}
+
+
 export async function loader(args) {
   const productId = '10099694108983';
   const shopifyEndpoint = 'https://htbu48-ps.myshopify.com/api/2024-10/graphql.json';
