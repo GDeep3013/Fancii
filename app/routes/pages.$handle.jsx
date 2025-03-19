@@ -87,6 +87,10 @@ export async function loader(args) {
             price {
               amount
             }
+           image {
+          url
+          altText
+        }   
           }
         }
       }
@@ -131,21 +135,23 @@ export default function Page() {
     <div dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />   
     <h3>Variants:</h3>
     <ul>
-    <li>
-      {product.images?.nodes?.map((image, index) => (
-      <img key={index} src={image.url} alt={image.altText || product.title} width="200" />
-    ))}
-      {product.variants?.nodes?.map((variant) => (
-        <span key={variant.id}>
-          {variant.title} - ${variant.price?.amount || 'N/A'}
-          <button
-            onClick={() => addToCartAndCheckout(product.id, variant.id)}
-            style={{ marginLeft: '10px' }}
-          >
-            Buy Now
-          </button>
-        </span>
-      ))}
+    <li>   
+     {product.variants?.nodes?.map((variant) => (
+  <div key={variant.id} style={{ marginBottom: '20px' }}>
+    <h3>{variant.title} - ${variant.price?.amount || 'N/A'}</h3>
+    {variant.image ? (
+      <img src={variant.image.url} alt={variant.image.altText || variant.title} width="200" />
+    ) : (
+      <p>No Image Available</p>
+    )}
+    <button
+      onClick={() => addToCartAndCheckout(product.id, variant.id)}
+      style={{ marginLeft: '10px' }}
+    >
+      Buy Now
+    </button>
+  </div>
+))}
       </li> 
     </ul>
   </div>
