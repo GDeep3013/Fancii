@@ -16,6 +16,7 @@ function loadShopifyAnalytics() {
 
 // Add to cart and checkout function
 async function addToCartAndCheckout(productId, variantId) {
+  alert(variantId);
   const shopifyEndpoint = 'https://htbu48-ps.myshopify.com/api/2024-10/graphql.json';
   const shopifyToken = '5620c3de24f081b6dc8328658eb56304';
 
