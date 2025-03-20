@@ -8,8 +8,17 @@ export const meta = ({ data }) => {
 };
 
 
+function loadShopifyAnalytics() {
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.shopify.com/shopifycloud/shopify-analytics/assets/v1.0/shopify-analytics.js';
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+}
 
 async function addToCartAndCheckout(productId, variantId) {
+  loadShopifyAnalytics();
   const shopifyEndpoint = 'https://htbu48-ps.myshopify.com/api/2024-10/graphql.json';
   const shopifyToken = '5620c3de24f081b6dc8328658eb56304';
 
@@ -152,6 +161,7 @@ export async function loader(args) {
 }
 
 export default function Page() {
+  loadShopifyAnalytics();
   const product = useLoaderData();
 
   if (!product) {
