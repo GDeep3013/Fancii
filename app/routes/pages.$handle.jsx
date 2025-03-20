@@ -7,20 +7,31 @@ export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.page?.title ?? 'Untitled'}` }];
 };
 
-function trackAddToCart(variantId, value = 29.99) {
-  if (window.Shopify?.pixels?.push) {
-    window.Shopify.pixels.push({
-      event: 'add_to_cart',
-      data: {
-        currency: 'USD',
-        value,
-        product_id: `gid://shopify/ProductVariant/${variantId}`,
-        quantity: 1,
+async function trackAddToCart(variantId, value = 29.99, quantity = 1) { 
+  try {
+    const response = await fetch('/apps/your-app-name/pixels/add-to-cart', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        event: 'add_to_cart',
+        data: {
+          currency: 'USD',
+          value,
+          product_id: `gid://shopify/ProductVariant/${variantId}`,
+          quantity,
+        },
+      }),
     });
-    console.log('Add to Cart event tracked using Web Pixels');
-  } else {
-    console.warn('Shopify Pixels API not available.');
+
+    if (!response.ok) {
+      throw new Error('Tracking failed');
+    }
+
+    console.log('Add to Cart event tracked');
+  } catch (error) {
+    console.error('Error tracking event:', error);
   }
 }
 
