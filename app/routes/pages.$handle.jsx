@@ -45,7 +45,7 @@ async function addToCartAndCheckout(productId, variantId) {
         'Content-Type': 'application/json',
         'X-Shopify-Storefront-Access-Token': shopifyToken,
       },
-      body: JSON.stringify({ query: mutation, variables: { variantId: `gid://shopify/ProductVariant/${variantId}` } }),
+      body: JSON.stringify({ query: mutation, variables: { variantId: `${variantId}` } }),
     });
 
     if (!response.ok) {
