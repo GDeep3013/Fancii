@@ -1,5 +1,4 @@
 import { useLoaderData } from '@remix-run/react';
-<script async src="https://cdn.shopify.com/shopifycloud/shopify-analytics/assets/v1.0/shopify-analytics.js"></script>
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -12,7 +11,7 @@ export const meta = ({ data }) => {
     script.async = true;
     document.body.appendChild(script);
   }, []);
-  
+
   return [{ title: `Hydrogen | ${data?.page?.title ?? 'Untitled'}` }];
 
 };
