@@ -8,17 +8,8 @@ export const meta = ({ data }) => {
 };
 
 
-function loadShopifyAnalytics() {
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.shopify.com/shopifycloud/shopify-analytics/assets/v1.0/shopify-analytics.js';
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
-}
 
 async function addToCartAndCheckout(productId, variantId) {
-  loadShopifyAnalytics();
   const shopifyEndpoint = 'https://htbu48-ps.myshopify.com/api/2024-10/graphql.json';
   const shopifyToken = '5620c3de24f081b6dc8328658eb56304';
 
@@ -36,10 +27,6 @@ async function addToCartAndCheckout(productId, variantId) {
           id
           checkoutUrl
         }
-        userErrors {
-          field
-          message
-        }
       }
     }
   `;
@@ -54,38 +41,22 @@ async function addToCartAndCheckout(productId, variantId) {
       body: JSON.stringify({ query: mutation, variables: { variantId } }),
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP Error! Status: ${response.status}`);
-    }
-
     const { data, errors } = await response.json();
-
-    if (errors || data?.cartCreate?.userErrors?.length > 0) {
-      console.error('Error creating cart:', errors || data.cartCreate.userErrors);
-      alert(data?.cartCreate?.userErrors?.[0]?.message || 'Failed to add to cart. Please try again.');
+    if (errors || !data?.cartCreate?.cart?.checkoutUrl) {
+      console.error('Error creating cart:', errors);
+      alert('Failed to add to cart. Please try again.');
       return;
     }
-
     const currentParams = window.location.search;
-    let checkoutUrl = data.cartCreate.cart.checkoutUrl;
 
+    // Append parameters to checkout URL
+    let checkoutUrl = data.cartCreate.cart.checkoutUrl;
     if (currentParams) {
       checkoutUrl += (checkoutUrl.includes('?') ? '&' : '?') + currentParams.substring(1);
     }
+console.log(checkoutUrl);
 
-    console.log('Checkout URL:', checkoutUrl);
-
-    // Track using ShopifyAnalytics if available
-    if (window.ShopifyAnalytics?.lib?.track) {
-      window.ShopifyAnalytics.lib.track('add_to_cart', {
-        currency: 'USD',
-        value: 29.99, // Adjust as needed
-        product_id: `gid://shopify/ProductVariant/${variantId}`,
-        quantity: 1,
-      });
-    } else {
-      console.warn('ShopifyAnalytics is not available');
-    }
+  
 
     // Redirect to checkout
     window.location.href = checkoutUrl;
@@ -94,6 +65,7 @@ async function addToCartAndCheckout(productId, variantId) {
     alert('Error adding item to cart.');
   }
 }
+
 
 
 /**
@@ -161,7 +133,6 @@ export async function loader(args) {
 }
 
 export default function Page() {
-  loadShopifyAnalytics();
   const product = useLoaderData();
 
   if (!product) {
