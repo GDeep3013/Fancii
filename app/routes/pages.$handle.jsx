@@ -7,7 +7,22 @@ export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.page?.title ?? 'Untitled'}` }];
 };
 
-
+function trackAddToCart(variantId, value = 29.99) {
+  if (window.Shopify?.pixels?.push) {
+    window.Shopify.pixels.push({
+      event: 'add_to_cart',
+      data: {
+        currency: 'USD',
+        value,
+        product_id: `gid://shopify/ProductVariant/${variantId}`,
+        quantity: 1,
+      },
+    });
+    console.log('Add to Cart event tracked using Web Pixels');
+  } else {
+    console.warn('Shopify Pixels API not available.');
+  }
+}
 
 async function addToCartAndCheckout(productId, variantId) {
   trackAddToCart(variantId, 29.99);
