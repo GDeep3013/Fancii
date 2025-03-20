@@ -1,4 +1,5 @@
 import {redirect} from '@shopify/remix-oxygen';
+import {CartMain} from '~/components/CartMain';
 
 /**
  * Automatically creates a new cart based on the URL and redirects straight to checkout.
