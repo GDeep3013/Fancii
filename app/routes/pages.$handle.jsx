@@ -52,7 +52,7 @@ async function addToCartAndCheckout(productId, variantId) {
       console.error('HTTP Error:', response.statusText);
       throw new Error('Failed to fetch from Shopify API');
     }
-
+    console.log(data, errors);
     const { data, errors } = await response.json();
     if (errors || !data?.cartCreate?.cart?.checkoutUrl) {
       console.error('Error creating cart:', errors);
