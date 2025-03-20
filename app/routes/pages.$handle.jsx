@@ -43,7 +43,7 @@ async function addToCartAndCheckout(productId, variantId) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Shopify-Storefront-Access-Token': shopifyToken,
+        'X-Shopify-Storefront-Access-Token': '5620c3de24f081b6dc8328658eb56304',
       },
       body: JSON.stringify({ query: mutation, variables: { variantId: `${variantId}` } }),
     });
