@@ -10,6 +10,7 @@ export const meta = ({ data }) => {
 
 
 async function addToCartAndCheckout(productId, variantId) {
+  trackAddToCart(variantId, 29.99);
   const shopifyEndpoint = 'https://htbu48-ps.myshopify.com/api/2024-10/graphql.json';
   const shopifyToken = '5620c3de24f081b6dc8328658eb56304';
 
