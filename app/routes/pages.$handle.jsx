@@ -55,8 +55,12 @@ async function addToCartAndCheckout(productId, variantId) {
       checkoutUrl += (checkoutUrl.includes('?') ? '&' : '?') + currentParams.substring(1);
     }
 console.log(checkoutUrl);
+
+  // Update cart id in cookie
+  const headers = cart.setCartId(data.cartCreate.cart.id);
     // Redirect to checkout
     window.location.href = checkoutUrl;
+    return redirect(checkoutUrl, {headers});
   } catch (error) {
     console.error('Cart API Error:', error);
     alert('Error adding item to cart.');
