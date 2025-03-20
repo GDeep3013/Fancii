@@ -65,16 +65,7 @@ async function addToCartAndCheckout(productId, variantId) {
     if (currentParams) {
       checkoutUrl += (checkoutUrl.includes('?') ? '&' : '?') + currentParams.substring(1);
     }
-
-    if (window.ShopifyAnalytics && window.ShopifyAnalytics.lib) {
-      window.ShopifyAnalytics.lib.track('add_to_cart', {
-        currency: 'USD',
-        value: 29.99,
-        product_id: variantId,
-        quantity: 1,
-      });
-    }
-
+ 
     window.location.href = checkoutUrl;
   } catch (error) {
     console.error('Cart API Error:', error);
