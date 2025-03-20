@@ -49,15 +49,15 @@ async function addToCartAndCheckout(productId, variantId, variant) {
 
   // redirect to checkout
  
-
-
     const currentParams = window.location.search;
     let checkoutUrl = data.cartCreate.cart.checkoutUrl;
+    localStorage.setItem('cartId', data.cartCreate.cart.id);
     if (currentParams) {
       checkoutUrl += (checkoutUrl.includes('?') ? '&' : '?') + currentParams.substring(1);
     }
     console.log(checkoutUrl);
-    return redirect(checkoutUrl, {headers});
+  
+
   } catch (error) {
     console.error('Cart API Error:', error);
     alert('Error adding item to cart.');
