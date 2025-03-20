@@ -55,6 +55,17 @@ async function addToCartAndCheckout(productId, variantId) {
       checkoutUrl += (checkoutUrl.includes('?') ? '&' : '?') + currentParams.substring(1);
     }
 console.log(checkoutUrl);
+
+if (window.ShopifyAnalytics && window.ShopifyAnalytics.lib) {
+  alert("analytics");
+  window.ShopifyAnalytics.lib.track('add_to_cart', {
+    currency: 'USD',
+    value: 29.99, // Adjust as needed
+    product_id: $variantId,
+    quantity: 1
+  });
+}
+
     // Redirect to checkout
     window.location.href = checkoutUrl;
   } catch (error) {
