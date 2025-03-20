@@ -47,6 +47,25 @@ async function addToCartAndCheckout(productId, variantId) {
       alert('Failed to add to cart. Please try again.');
       return;
     }
+
+    if (data?.cartCreate?.cart?.id) {
+      window.Shopify = window.Shopify || {};
+      window.Shopify.analytics = window.Shopify.analytics || {};
+      
+      window.Shopify.analytics.publish('cart_add', {
+        currency: 'USD', // Adjust as per your store's currency
+        value: parseFloat(variant.price?.amount || '0'),
+        items: [
+          {
+            product_id: productId,
+            variant_id: variantId,
+            quantity: 1,
+          },
+        ],
+      });
+    
+      console.log('Add to Cart event tracked');
+    }
     const currentParams = window.location.search;
 
     // Append parameters to checkout URL
